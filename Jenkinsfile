@@ -3,7 +3,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: "https://github.com/RickNoutat/landing-page-example"
+                echo 'Récupération du code source...'
+                checkout scm
             }
         }
         stage('Build') {
@@ -23,3 +24,4 @@ pipeline {
         }
     }
 }
+
