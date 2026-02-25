@@ -2,7 +2,7 @@ pipeline {
     agent { label 'agent-1' }
     environment {
         AZURE_VM = 'rkydvnci@20.215.208.75'
-        IMAGE = 'rickydavinci/landing-page:latest'
+        IMAGE = 'rickydavinci/landing-page'
     }
     stages {
         stage('Checkout') {
@@ -11,9 +11,16 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build') {
+        stage('Build Image') {
             steps {
-                echo 'Compilation du projet...'
+                echo 'Construction de l\'image Docker...'
+                sh 'docker build -t ${IMAGE}:latest .'
+            }
+        }
+        stage('Push Image') {
+            steps {
+                echo 'Publication sur DockerHub...'
+                sh 'docker push ${IMAGE}:latest'
             }
         }
         stage('Test') {
@@ -26,10 +33,10 @@ pipeline {
                 echo 'Déploiement sur Azure...'
                 sh """
                     ssh -o StrictHostKeyChecking=no ${AZURE_VM} '
-                        docker pull ${IMAGE} &&
+                        docker pull ${IMAGE}:latest &&
                         docker stop landing || true &&
                         docker rm landing || true &&
-                        docker run -d --name landing -p 80:80 ${IMAGE}
+                        docker run -d --name landing -p 80:80 ${IMAGE}:latest
                     '
                 """
             }
